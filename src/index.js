@@ -8,9 +8,16 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
 const viewer = new Cesium.Viewer('cesiumContainer', {
+    baseLayerPicker: false,
     animation: false,
-    timeline: false
-    //terrainProvider: createWorldTerrainAsync()
+    timeline: false,
+    sceneModePicker: false,
+    vrButton: true,
+    baseLayer: Cesium.ImageryLayer.fromProviderAsync(
+      Cesium.ArcGisMapServerImageryProvider.fromUrl(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
+      )
+    ),
 });
 
 var r= 255, g=0, b=0;
