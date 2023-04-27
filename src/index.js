@@ -5,6 +5,23 @@ import "../src/css/main.css"
 // Your access token can be found at: https://cesium.com/ion/tokens.
 // This is the default access token
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxk';
+/**
+{
+  "x": 16401158.864433127,
+  "y": 6321194.727142305,
+  "z": 8095384.33735316
+}
+**/
+
+var west  = -100000.0;
+var south = -100000.0;
+var east  = 100000.0;
+var north = 100000.0;
+
+var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
+
+Cesium.Camera.DEFAULT_VIEW_FACTOR = 1;
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
 const viewer = new Cesium.Viewer('cesiumContainer', {
