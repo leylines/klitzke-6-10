@@ -8,7 +8,9 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
 const viewer = new Cesium.Viewer('cesiumContainer', {
-  //terrainProvider: createWorldTerrainAsync()
+    animation: false,
+    timeline: false
+    //terrainProvider: createWorldTerrainAsync()
 });
 
 var r= 255, g=0, b=0;
