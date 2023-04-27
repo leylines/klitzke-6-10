@@ -17,35 +17,21 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
 const viewer = new Cesium.Viewer('cesiumContainer', {
+    infoBox: false,
     baseLayerPicker: false,
     animation: false,
     timeline: false,
     sceneModePicker: false,
     vrButton: true,
+    navigationHelpButton: false,
+    navigationInstructionsInitiallyVisible: false,
+    scene3DOnly: true,
     baseLayer: Cesium.ImageryLayer.fromProviderAsync(
       Cesium.ArcGisMapServerImageryProvider.fromUrl(
         "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
       )
     ),
 });
-
-var r= 255, g=0, b=0;
-//New color every time it's called
-var fadeColorDodo = new Cesium.CallbackProperty(function(time, result){
-    if (r > 0 && b === 0) {
-       r--;
-       g++;
-    }
-    if (g > 0 && r === 0) {
-       g--;
-       b++;
-    }
-    if (b > 0 && g === 0) {
-       r++;
-       b--;
-    }
-    return Cesium.Color.fromBytes(r, g, b, 160, result);
-}, false);
 
 async function loadWorldTerrain() {
   let worldTerrain;
@@ -101,7 +87,7 @@ const icosahedrons = [icosahedron1, icosahedron2, icosahedron3, icosahedron4, ic
 
 // Settings for platonic solids
 const corridorWidth = 120000;
-const polygonTransparency = 0.2;
+const polygonTransparency = 0.4;
 const polylineWidth = 2;
 
 // Dodecahedron
@@ -112,6 +98,24 @@ const dodecahedronPolygonColor = Cesium.Color.BLUE.withAlpha(polygonTransparency
 // Polygon
 const icosahedronPolygonColor = Cesium.Color.RED.withAlpha(polygonTransparency);
 
+var maxHeight = 4800000;
+var icoHeight = maxHeight;
+var minHeight = 2500000;
+var dodeHeight = minHeight;
+var dodeDirection = "greater";
+
+var fadeColorDodo = new Cesium.CallbackProperty(function(time, result){
+    var r = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
+    var b = 255 - r
+    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
+}, false);
+
+var fadeColorIco = new Cesium.CallbackProperty(function(time, result){
+    var b = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
+    var r = 255 - b
+    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
+}, false);
+
 dodecahedrons.forEach((dodecahedron, index) => {
   for (let i = 0; i < dodecahedron.length - 1; i++) {
     const corridor = viewer.entities.add({
@@ -119,7 +123,7 @@ dodecahedrons.forEach((dodecahedron, index) => {
       corridor: {
         width: corridorWidth,
         height: 0,
-        material: Cesium.Color.CYAN.withAlpha(0.1),
+        material: new Cesium.ColorMaterialProperty(fadeColorDodo),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([dodecahedron[i][0], dodecahedron[i][1], dodecahedron[i+1][0], dodecahedron[i+1][1]]),
       }
@@ -131,10 +135,9 @@ dodecahedrons.forEach((dodecahedron, i) => {
   const polygon = viewer.entities.add({
     name: "Dodecahedron Polygon" + i,
     polygon: {
-      //material: new Cesium.ColorMaterialProperty(fadeColorDodo),
-      material: dodecahedronPolygonColor,
+      material: new Cesium.ColorMaterialProperty(fadeColorDodo),
       outline: true,
-      outlineColor: Cesium.Color.CYAN,
+      outlineColor: Cesium.Color.WHITE,
       perPositionHeight: true,
       hierarchy: new Cesium.CallbackProperty(getDodecahedronHeight(dodecahedron), false)
     }
@@ -154,7 +157,7 @@ icosahedrons.forEach((icosahedron, index) => {
       corridor: {
         width: corridorWidth,
         height: 0,
-        material: Cesium.Color.ORANGE.withAlpha(0.1),
+        material: new Cesium.ColorMaterialProperty(fadeColorIco),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([icosahedron[i][0], icosahedron[i][1], icosahedron[i+1][0], icosahedron[i+1][1]]),
       }
@@ -166,9 +169,9 @@ icosahedrons.forEach((icosahedron, i) => {
   const polygon = viewer.entities.add({
     name: "Icosahedron Polygon" + i,
     polygon: {
-      material: icosahedronPolygonColor,
+      material: new Cesium.ColorMaterialProperty(fadeColorIco),
       outline: true,
-      outlineColor: Cesium.Color.ORANGE,
+      outlineColor: Cesium.Color.WHITE,
       perPositionHeight: true,
       hierarchy: new Cesium.CallbackProperty(getIcosahedronHeight(icosahedron), false)
     }
@@ -180,12 +183,6 @@ function getIcosahedronHeight(icosahedron) {
     return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], icoHeight, icosahedron[1][0], icosahedron[1][1], icoHeight, icosahedron[2][0], icosahedron[2][1], icoHeight]) };
   };
 }
-
-var maxHeight = 4800000;
-var icoHeight = maxHeight;
-var minHeight = 2500000;
-var dodeHeight = minHeight;
-var dodeDirection = "greater";
 
 setInterval(function(){
   if (dodeDirection  == "greater" && dodeHeight < maxHeight) {
