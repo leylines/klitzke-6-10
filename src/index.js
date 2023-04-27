@@ -104,16 +104,28 @@ var minHeight = 2500000;
 var dodeHeight = minHeight;
 var dodeDirection = "greater";
 
-var fadeColorDodo = new Cesium.CallbackProperty(function(time, result){
+var fadeColorDodoPolygon = new Cesium.CallbackProperty(function(time, result){
     var r = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
     var b = 255 - r
     return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
 }, false);
 
-var fadeColorIco = new Cesium.CallbackProperty(function(time, result){
+var fadeColorDodoCorridor = new Cesium.CallbackProperty(function(time, result){
+    var r = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
+    var b = 255 - r
+    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 40, result);
+}, false);
+
+var fadeColorIcoPolygon = new Cesium.CallbackProperty(function(time, result){
     var b = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
     var r = 255 - b
     return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
+}, false);
+
+var fadeColorIcoCorridor = new Cesium.CallbackProperty(function(time, result){
+    var b = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
+    var r = 255 - b
+    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 40, result);
 }, false);
 
 dodecahedrons.forEach((dodecahedron, index) => {
@@ -123,7 +135,7 @@ dodecahedrons.forEach((dodecahedron, index) => {
       corridor: {
         width: corridorWidth,
         height: 0,
-        material: new Cesium.ColorMaterialProperty(fadeColorDodo),
+        material: new Cesium.ColorMaterialProperty(fadeColorDodoCorridor),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([dodecahedron[i][0], dodecahedron[i][1], dodecahedron[i+1][0], dodecahedron[i+1][1]]),
       }
@@ -135,7 +147,7 @@ dodecahedrons.forEach((dodecahedron, i) => {
   const polygon = viewer.entities.add({
     name: "Dodecahedron Polygon" + i,
     polygon: {
-      material: new Cesium.ColorMaterialProperty(fadeColorDodo),
+      material: new Cesium.ColorMaterialProperty(fadeColorDodoPolygon),
       outline: true,
       outlineColor: Cesium.Color.WHITE,
       perPositionHeight: true,
@@ -157,7 +169,7 @@ icosahedrons.forEach((icosahedron, index) => {
       corridor: {
         width: corridorWidth,
         height: 0,
-        material: new Cesium.ColorMaterialProperty(fadeColorIco),
+        material: new Cesium.ColorMaterialProperty(fadeColorIcoCorridor),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([icosahedron[i][0], icosahedron[i][1], icosahedron[i+1][0], icosahedron[i+1][1]]),
       }
@@ -169,7 +181,7 @@ icosahedrons.forEach((icosahedron, i) => {
   const polygon = viewer.entities.add({
     name: "Icosahedron Polygon" + i,
     polygon: {
-      material: new Cesium.ColorMaterialProperty(fadeColorIco),
+      material: new Cesium.ColorMaterialProperty(fadeColorIcoPolygon),
       outline: true,
       outlineColor: Cesium.Color.WHITE,
       perPositionHeight: true,
