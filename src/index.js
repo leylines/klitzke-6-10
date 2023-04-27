@@ -5,19 +5,11 @@ import "../src/css/main.css"
 // Your access token can be found at: https://cesium.com/ion/tokens.
 // This is the default access token
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxk';
-/**
-{
-  "x": 16401158.864433127,
-  "y": 6321194.727142305,
-  "z": 8095384.33735316
-}
-**/
 
 var west  = -100000.0;
 var south = -100000.0;
 var east  = 100000.0;
 var north = 100000.0;
-
 var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
 
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 1;
@@ -69,24 +61,6 @@ loadWorldTerrain();
 // Settings
 viewer.scene.globe.enableLighting = true;
 
-// Settings for platonic solids
-const corridorWidth = 120000;
-const polygonTransparency = 0.2;
-const polylineWidth = 2;
-const height = 2500000;
-
-// Dodecahedron
-// Corridor
-const dodecahedronCorridorColor = new Cesium.Color.CYAN.withAlpha(0.2);
-// Polygon
-const dodecahedronPolygonColor = Cesium.Color.BLUE.withAlpha(polygonTransparency);
-
-// Icosahedron
-// Corridor
-const icosahedronCorridorColor = Cesium.Color.ORANGE.withAlpha(0.2);
-// Polygon
-const icosahedronPolygonColor = Cesium.Color.RED.withAlpha(polygonTransparency);
-
 const dodecahedron1 = [[-40.79776321801472,10.808510583843841],[-4.80138334081505,-10.822281509027434],[31.2,10.800000000010684],[31.200000000000003,52.61031489578929],[-40.78466772957245,52.618824140935395],[-40.79776321801472,10.808510583843841]];
 const dodecahedron2 = [[31.200000000000003,52.61031489578929],[31.2,10.800000000010684],[67.20138334081507,-10.822281509027448],[103.19776321801469,10.808510583843827],[103.1846677295724,52.618824140935374],[31.200000000000003,52.61031489578929]];
 const dodecahedron3 = [[103.19776321801469,10.808510583843827],[139.2022367819853,-10.808510583843841],[175.19861665918495,10.822281509027434],[175.19052028333158,52.63259589328868],[103.1846677295724,52.618824140935374],[103.19776321801469,10.808510583843827]];
@@ -101,59 +75,6 @@ const dodecahedron11 = [[-76.81533227042763,-52.618824140935374],[-4.80947971666
 const dodecahedron12 = [[139.21533227042758,-52.6188241409354],[67.20947971666843,-52.63259589328871],[-4.809479716668477,-52.63259589328871],[-76.81533227042763,-52.618824140935374],[-148.8,-52.61031489578929],[139.21533227042758,-52.6188241409354]];
 
 const dodecahedrons = [dodecahedron1, dodecahedron2, dodecahedron3, dodecahedron4, dodecahedron5, dodecahedron6, dodecahedron7, dodecahedron8, dodecahedron9, dodecahedron10, dodecahedron11, dodecahedron12];
-
-dodecahedrons.forEach((dodecahedron, index) => {
-  for (let i = 0; i < dodecahedron.length - 1; i++) {
-    let points = [dodecahedron[i][0], dodecahedron[i][1], 0, dodecahedron[i+1][0], dodecahedron[i+1][1], 0]
-
-    const corridor = viewer.entities.add({
-      name: "Dodecahedron Corridor " + i,
-      corridor: {
-        width: corridorWidth,
-        height: 0,
-        material: dodecahedronCorridorColor,
-        outline: false,
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights(points),
-      }
-    });
-  };
-});
-
-var dodeHeight = 2500000;
-var dodeDirection = "greater"
-dodecahedrons.forEach((dodecahedron, i) => {
-  const polygon = viewer.entities.add({
-    name: "Dodecahedron Polygon" + i,
-    polygon: {
-      //material: new Cesium.ColorMaterialProperty(fadeColorDodo),
-      material: dodecahedronPolygonColor,
-      outline: true,
-      outlineColor: Cesium.Color.CYAN,
-      perPositionHeight: true,
-      hierarchy: new Cesium.CallbackProperty(getDodecahedronHeight(dodecahedron), false)
-    }
-  });
-});
-
-function getDodecahedronHeight(dodecahedron) {
-  return function callbackFunction() {
-    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodeHeight, dodecahedron[1][0], dodecahedron[1][1], dodeHeight, dodecahedron[2][0], dodecahedron[2][1], dodeHeight, dodecahedron[3][0], dodecahedron[3][1], dodeHeight, dodecahedron[4][0], dodecahedron[4][1], dodeHeight]) };
-  };
-}
-
-setInterval(function(){
-  if (dodeDirection  == "greater" && dodeHeight < 5000000) {
-    dodeHeight = dodeHeight + 10000
-  } else if (dodeDirection  == "greater" && dodeHeight == 5000000) {
-    dodeDirection = "smaller"
-    dodeHeight = dodeHeight - 10000
-  } else if (dodeDirection  == "smaller" && dodeHeight > 2500000) {
-    dodeHeight = dodeHeight - 10000
-  } else {
-    dodeDirection = "greater"
-    dodeHeight = dodeHeight + 10000
-  }
-}, 50);
 
 const icosahedron1 = [[66.70941343069455,27.978409693953772],[-6.69436868171357,28.832154577243884],[29.375674309792444,-24.27636072067999],[66.70941343069455,27.978409693953772]];
 const icosahedron2 = [[66.70941343069455,27.978409693953772],[29.375674309792444,-24.27636072067999],[100.51573889211991,-26.512886979254972],[66.70941343069455,27.9784096939537722]];
@@ -178,28 +99,70 @@ const icosahedron20 = [[-41.34609580311263,-25.16283070639531],[12.3613868317694
 
 const icosahedrons = [icosahedron1, icosahedron2, icosahedron3, icosahedron4, icosahedron5, icosahedron6, icosahedron7, icosahedron8, icosahedron9, icosahedron10, icosahedron11, icosahedron12, icosahedron13, icosahedron14, icosahedron15, icosahedron16, icosahedron17, icosahedron18, icosahedron19, icosahedron20]
 
-icosahedrons.forEach((icosahedron, index) => {
-  for (let i = 0; i < icosahedron.length - 1; i++) {
-    let points = [icosahedron[i][0], icosahedron[i][1], 0, icosahedron[i+1][0], icosahedron[i+1][1], 0]
+// Settings for platonic solids
+const corridorWidth = 120000;
+const polygonTransparency = 0.2;
+const polylineWidth = 2;
 
+// Dodecahedron
+// Polygon
+const dodecahedronPolygonColor = Cesium.Color.BLUE.withAlpha(polygonTransparency);
+
+// Icosahedron
+// Polygon
+const icosahedronPolygonColor = Cesium.Color.RED.withAlpha(polygonTransparency);
+
+dodecahedrons.forEach((dodecahedron, index) => {
+  for (let i = 0; i < dodecahedron.length - 1; i++) {
     const corridor = viewer.entities.add({
-      name: "corridor " + i,
+      name: "Dodecahedron Corridor " + i,
       corridor: {
         width: corridorWidth,
         height: 0,
-        material: dodecahedronCorridorColor,
+        material: Cesium.Color.CYAN.withAlpha(0.1),
         outline: false,
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights(points),
+        positions: Cesium.Cartesian3.fromDegreesArray([dodecahedron[i][0], dodecahedron[i][1], dodecahedron[i+1][0], dodecahedron[i+1][1]]),
       }
     });
   };
 });
 
-var icoHeight = 5000000;
-var icoDirection = "smaller"
-icosahedrons.forEach((icosahedron, i) => {
-  let points = [icosahedron[0][0], icosahedron[0][1], icosahedron[1][0], icosahedron[1][1], icosahedron[2][0], icosahedron[2][1]]
+dodecahedrons.forEach((dodecahedron, i) => {
+  const polygon = viewer.entities.add({
+    name: "Dodecahedron Polygon" + i,
+    polygon: {
+      //material: new Cesium.ColorMaterialProperty(fadeColorDodo),
+      material: dodecahedronPolygonColor,
+      outline: true,
+      outlineColor: Cesium.Color.CYAN,
+      perPositionHeight: true,
+      hierarchy: new Cesium.CallbackProperty(getDodecahedronHeight(dodecahedron), false)
+    }
+  });
+});
 
+function getDodecahedronHeight(dodecahedron) {
+  return function callbackFunction() {
+    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodeHeight, dodecahedron[1][0], dodecahedron[1][1], dodeHeight, dodecahedron[2][0], dodecahedron[2][1], dodeHeight, dodecahedron[3][0], dodecahedron[3][1], dodeHeight, dodecahedron[4][0], dodecahedron[4][1], dodeHeight]) };
+  };
+}
+
+icosahedrons.forEach((icosahedron, index) => {
+  for (let i = 0; i < icosahedron.length - 1; i++) {
+    const corridor = viewer.entities.add({
+      name: "corridor " + i,
+      corridor: {
+        width: corridorWidth,
+        height: 0,
+        material: Cesium.Color.ORANGE.withAlpha(0.1),
+        outline: false,
+        positions: Cesium.Cartesian3.fromDegreesArray([icosahedron[i][0], icosahedron[i][1], icosahedron[i+1][0], icosahedron[i+1][1]]),
+      }
+    });
+  };
+});
+
+icosahedrons.forEach((icosahedron, i) => {
   const polygon = viewer.entities.add({
     name: "Icosahedron Polygon" + i,
     polygon: {
@@ -218,16 +181,26 @@ function getIcosahedronHeight(icosahedron) {
   };
 }
 
+var maxHeight = 4800000;
+var icoHeight = maxHeight;
+var minHeight = 2500000;
+var dodeHeight = minHeight;
+var dodeDirection = "greater";
+
 setInterval(function(){
-  if (icoDirection  == "greater" && icoHeight < 5000000) {
+  if (dodeDirection  == "greater" && dodeHeight < maxHeight) {
+    dodeHeight = dodeHeight + 10000
+    icoHeight = icoHeight - 10000
+  } else if (dodeDirection  == "greater" && dodeHeight == maxHeight) {
+    dodeDirection = "smaller"
+    dodeHeight = dodeHeight - 10000
     icoHeight = icoHeight + 10000
-  } else if (icoDirection  == "greater" && icoHeight == 5000000) {
-    icoDirection = "smaller"
-    icoHeight = icoHeight - 10000
-  } else if (icoDirection  == "smaller" && icoHeight > 2500000) {
-    icoHeight = icoHeight - 10000
+  } else if (dodeDirection  == "smaller" && dodeHeight > minHeight) {
+    dodeHeight = dodeHeight - 10000
+    icoHeight = icoHeight + 10000
   } else {
-    icoDirection = "greater"
-    icoHeight = icoHeight + 10000
+    dodeDirection = "greater"
+    dodeHeight = dodeHeight + 10000
+    icoHeight = icoHeight - 10000
   }
-}, 50);
+}, 10);
