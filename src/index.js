@@ -44,6 +44,30 @@ async function loadWorldTerrain() {
 };
 loadWorldTerrain();
 
+var rotatioSpeed;
+var lastNow;
+
+function spinIt(scene, time) {
+    var now = Date.now();
+    var spinRate = rotatioSpeed; //0.08;
+    var delta = (now - lastNow) / 1000;
+    lastNow = now;
+    viewer.scene.camera.rotate(Cesium.Cartesian3.UNIT_Z, spinRate * delta);
+}
+
+function spinGlobe(viewer){
+    lastNow = Date.now();
+    viewer.scene.postRender.addEventListener(spinIt);
+}
+
+document.getElementById("spin").addEventListener("click", function (e) {
+    rotatioSpeed=0.5;
+    spinGlobe(viewer);
+    setTimeout(function(){
+        rotatioSpeed=0.0;viewer.scene.postRender.removeEventListener(spinIt);
+    }, 3600);    
+});
+
 // Settings
 viewer.scene.globe.enableLighting = true;
 
