@@ -4,8 +4,8 @@ import "../src/css/main.css"
 
 // Your access token can be found at: https://cesium.com/ion/tokens.
 // This is the default access token
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiY2MyZjMxNS01NjI0LTQ3MjMtOTM3MC01NTZiODZkOTdlZjgiLCJpZCI6MTA3LCJpYXQiOjE1MjU0MjA2ODd9.VX2WAx6oqH1yiSxA7heQYax9jhq_p1gBtd1IrRHKzko';
-var background_img ="images/pink.jpg";
+// Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiY2MyZjMxNS01NjI0LTQ3MjMtOTM3MC01NTZiODZkOTdlZjgiLCJpZCI6MTA3LCJpYXQiOjE1MjU0MjA2ODd9.VX2WAx6oqH1yiSxA7heQYax9jhq_p1gBtd1IrRHKzko';
+var background_img ="images/blue.jpg";
 var skybox = new Cesium.SkyBox({
     sources: {
         positiveX: background_img,
@@ -26,62 +26,127 @@ var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 1;
 Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
-// Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-const viewer = new Cesium.Viewer('cesiumContainer', {
-    skyBox: skybox,
-    infoBox: false,
-    baseLayerPicker: true,
+const clockViewModel = new Cesium.ClockViewModel();
+const optionsSphere = {
     animation: false,
-    timeline: false,
-    sceneModePicker: false,
-    vrButton: true,
+    baseLayerPicker: true,
+    clockViewModel: clockViewModel,
+    fullscreenButton: false,
+    geocoder: false,
+    globe: false,
+    infoBox: false,
     navigationHelpButton: false,
     navigationInstructionsInitiallyVisible: false,
+    sceneModePicker: false,
+    skyBox: skybox,
+    sceneModePicker: false,
     scene3DOnly: true,
+    timeline: false,
+};
+const optionsEarth = {
+    animation: false,
+    baseLayerPicker: false,
+    clockViewModel: clockViewModel,
+    fullscreenButton: false,
+    geocoder: false,
+    hdr: true,
+    homeButton: false,
+    infoBox: false,
+    navigationHelpButton: false,
+    navigationInstructionsInitiallyVisible: false,
+    sceneModePicker: false,
+    scene3DOnly: true,
+    timeline: false,
     baseLayer: Cesium.ImageryLayer.fromProviderAsync(
       Cesium.ArcGisMapServerImageryProvider.fromUrl(
         "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
       )
     ),
-});
+};
 
+const viewSphere = new Cesium.Viewer("viewSphere", optionsSphere);
+const viewEarth = new Cesium.Viewer("viewEarth", optionsEarth);
+
+/**
 async function loadWorldTerrain() {
   let worldTerrain;
   try {
     worldTerrain = await Cesium.createWorldTerrainAsync();
-    viewer.scene.terrainProvider = worldTerrain;
+    viewEarth.scene.terrainProvider = worldTerrain;
   } catch (error) {
     window.alert(`There was an error creating world terrain. ${error}`);
   }
 };
+
 loadWorldTerrain();
+**/
 
-var rotatioSpeed;
-var lastNow;
+let sphereWorldPosition;
+let sphereDistance;
 
-function spinIt(scene, time) {
-    var now = Date.now();
-    var spinRate = rotatioSpeed; //0.08;
-    var delta = (now - lastNow) / 1000;
-    lastNow = now;
-    viewer.scene.camera.rotate(Cesium.Cartesian3.UNIT_Z, spinRate * delta);
+function syncEarthView() {
+  // The center of the view is the point that the 3D camera is focusing on
+  const viewCenter = new Cesium.Cartesian2(
+    Math.floor(viewSphere.canvas.clientWidth / 2),
+    Math.floor(viewSphere.canvas.clientHeight / 2)
+  );
+  // Given the pixel in the center, get the world position
+  const newSphereWorldPosition = viewSphere.scene.camera.pickEllipsoid(
+    viewCenter
+  );
+  if (Cesium.defined(newSphereWorldPosition)) {
+    // Guard against the case where the center of the screen
+    // does not fall on a position on the globe
+    sphereWorldPosition = newSphereWorldPosition;
+  }
+  // Get the distance between the world position of the point the camera is focusing on, and the camera's world position
+  sphereDistance = Cesium.Cartesian3.distance(
+    sphereWorldPosition,
+    viewSphere.scene.camera.positionWC
+  );
+  // Tell the 2D camera to look at the point of focus. The distance controls how zoomed in the 2D view is
+  // (try replacing `distance` in the line below with `1e7`. The view will still sync, but will have a constant zoom)
+  viewEarth.scene.camera.lookAt(
+    sphereWorldPosition,
+    new Cesium.Cartesian3(0.0, 0.0, sphereDistance)
+  );
 }
 
-function spinGlobe(viewer){
-    lastNow = Date.now();
-    viewer.scene.postRender.addEventListener(spinIt);
-}
+// Apply our sync function every time the 3D camera view changes
+viewSphere.camera.changed.addEventListener(syncEarthView);
+// By default, the `camera.changed` event will trigger when the camera has changed by 50%
+// To make it more sensitive, we can bring down this sensitivity
+viewSphere.camera.percentageChanged = 0.01;
 
-document.getElementById("spin").addEventListener("click", function (e) {
-    rotatioSpeed=0.5;
-    spinGlobe(viewer);
-    setTimeout(function(){
-        rotatioSpeed=0.0;viewer.scene.postRender.removeEventListener(spinIt);
-    }, 3600);    
-});
+// Since the 2D view follows the 3D view, we disable any
+// camera movement on the 2D view
+viewEarth.scene.screenSpaceCameraController.enableRotate = false;
+viewEarth.scene.screenSpaceCameraController.enableTranslate = false;
+viewEarth.scene.screenSpaceCameraController.enableZoom = false;
+viewEarth.scene.screenSpaceCameraController.enableTilt = false;
+viewEarth.scene.screenSpaceCameraController.enableLook = false;
 
-// Settings
-viewer.scene.globe.enableLighting = true;
+/**
+const scene = viewer.scene;
+const globe = scene.globe;
+const baseLayer = viewer.scene.imageryLayers.get(0);
+
+//globe.showGroundAtmosphere = false;
+//globe.baseColor = Cesium.Color.TRANSPARENT;
+//globe.translucency.enabled = true;
+//globe.undergroundColor = undefined;
+
+// Set oceans on base layer to transparent
+//baseLayer.colorToAlpha = new Cesium.Color(0.0, 0.0, 0.0);
+//baseLayer.colorToAlphaThreshold = 0.2;
+
+globe.showGroundAtmosphere = false;
+globe.translucency.enabled = true;
+globe.undergroundColor = undefined;
+globe.translucency.frontFaceAlpha = 0.20;
+globe.translucency.backFaceAlpha = 0.00;
+
+**/
 
 const dodecahedron1 = [[-40.79776321801472,10.808510583843841],[-4.80138334081505,-10.822281509027434],[31.2,10.800000000010684],[31.200000000000003,52.61031489578929],[-40.78466772957245,52.618824140935395],[-40.79776321801472,10.808510583843841]];
 const dodecahedron2 = [[31.200000000000003,52.61031489578929],[31.2,10.800000000010684],[67.20138334081507,-10.822281509027448],[103.19776321801469,10.808510583843827],[103.1846677295724,52.618824140935374],[31.200000000000003,52.61031489578929]];
@@ -121,57 +186,19 @@ const icosahedron20 = [[-41.34609580311263,-25.16283070639531],[12.3613868317694
 
 const icosahedrons = [icosahedron1, icosahedron2, icosahedron3, icosahedron4, icosahedron5, icosahedron6, icosahedron7, icosahedron8, icosahedron9, icosahedron10, icosahedron11, icosahedron12, icosahedron13, icosahedron14, icosahedron15, icosahedron16, icosahedron17, icosahedron18, icosahedron19, icosahedron20]
 
-// Settings for platonic solids
-const corridorWidth = 120000;
-const polygonTransparency = 0.4;
-const polylineWidth = 2;
-
-// Dodecahedron
-// Polygon
-const dodecahedronPolygonColor = Cesium.Color.BLUE.withAlpha(polygonTransparency);
-
-// Icosahedron
-// Polygon
-const icosahedronPolygonColor = Cesium.Color.RED.withAlpha(polygonTransparency);
-
-var maxHeight = 4800000;
-var icoHeight = maxHeight;
-var minHeight = 2500000;
-var dodeHeight = minHeight;
-var dodeDirection = "greater";
-
-var fadeColorDodoPolygon = new Cesium.CallbackProperty(function(time, result){
-    var r = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
-    var b = 255 - r
-    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
-}, false);
-
-var fadeColorDodoCorridor = new Cesium.CallbackProperty(function(time, result){
-    var r = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
-    var b = 255 - r
-    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 40, result);
-}, false);
-
-var fadeColorIcoPolygon = new Cesium.CallbackProperty(function(time, result){
-    var b = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
-    var r = 255 - b
-    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 100, result);
-}, false);
-
-var fadeColorIcoCorridor = new Cesium.CallbackProperty(function(time, result){
-    var b = (( dodeHeight - minHeight ) / (maxHeight - minHeight)) * (255 - 0) + 0
-    var r = 255 - b
-    return Cesium.Color.fromBytes(Math.round(r), 0, Math.round(b), 40, result);
-}, false);
+var maxHeight = 7300000;
+var minHeight = 5300000;
+var globeHeight = 6300000;
+var direction = "greater";
 
 dodecahedrons.forEach((dodecahedron, index) => {
   for (let i = 0; i < dodecahedron.length - 1; i++) {
-    const corridor = viewer.entities.add({
+    const corridor = viewEarth.entities.add({
       name: "Dodecahedron Corridor " + i,
       corridor: {
-        width: corridorWidth,
+        width: 120000,
         height: 0,
-        material: new Cesium.ColorMaterialProperty(fadeColorDodoCorridor),
+        material: Cesium.Color.GREY.withAlpha(0.4),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([dodecahedron[i][0], dodecahedron[i][1], dodecahedron[i+1][0], dodecahedron[i+1][1]]),
       }
@@ -180,32 +207,30 @@ dodecahedrons.forEach((dodecahedron, index) => {
 });
 
 dodecahedrons.forEach((dodecahedron, i) => {
-  const polygon = viewer.entities.add({
+  let dodecahedronHeight = 300000;
+  const polygon = viewSphere.entities.add({
     name: "Dodecahedron Polygon" + i,
     polygon: {
-      material: new Cesium.ColorMaterialProperty(fadeColorDodoPolygon),
+      material: Cesium.Color.BLACK.withAlpha(0.1),
+      arcType: 'NONE',
+      width: 3,
       outline: true,
-      outlineColor: Cesium.Color.WHITE,
       perPositionHeight: true,
-      hierarchy: new Cesium.CallbackProperty(getDodecahedronHeight(dodecahedron), false)
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 100,
+      hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodecahedronHeight, dodecahedron[1][0], dodecahedron[1][1], dodecahedronHeight, dodecahedron[2][0], dodecahedron[2][1], dodecahedronHeight, dodecahedron[3][0], dodecahedron[3][1], dodecahedronHeight, dodecahedron[4][0], dodecahedron[4][1], dodecahedronHeight])
     }
   });
 });
 
-function getDodecahedronHeight(dodecahedron) {
-  return function callbackFunction() {
-    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodeHeight, dodecahedron[1][0], dodecahedron[1][1], dodeHeight, dodecahedron[2][0], dodecahedron[2][1], dodeHeight, dodecahedron[3][0], dodecahedron[3][1], dodeHeight, dodecahedron[4][0], dodecahedron[4][1], dodeHeight]) };
-  };
-}
-
 icosahedrons.forEach((icosahedron, index) => {
   for (let i = 0; i < icosahedron.length - 1; i++) {
-    const corridor = viewer.entities.add({
+    const corridor = viewEarth.entities.add({
       name: "corridor " + i,
       corridor: {
-        width: corridorWidth,
+        width: 120000,
         height: 0,
-        material: new Cesium.ColorMaterialProperty(fadeColorIcoCorridor),
+        material: Cesium.Color.GREY.withAlpha(0.4),
         outline: false,
         positions: Cesium.Cartesian3.fromDegreesArray([icosahedron[i][0], icosahedron[i][1], icosahedron[i+1][0], icosahedron[i+1][1]]),
       }
@@ -214,38 +239,46 @@ icosahedrons.forEach((icosahedron, index) => {
 });
 
 icosahedrons.forEach((icosahedron, i) => {
-  const polygon = viewer.entities.add({
+  let icosahedronHeight = 900000;
+  const polygon = viewSphere.entities.add({
     name: "Icosahedron Polygon" + i,
     polygon: {
-      material: new Cesium.ColorMaterialProperty(fadeColorIcoPolygon),
-      outline: true,
-      outlineColor: Cesium.Color.WHITE,
+      material: Cesium.Color.BLACK.withAlpha(0.1),
+      arcType: 'NONE',
+      width: 3,
       perPositionHeight: true,
-      hierarchy: new Cesium.CallbackProperty(getIcosahedronHeight(icosahedron), false)
+      outline: true,
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 5,
+      hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], icosahedronHeight, icosahedron[1][0], icosahedron[1][1], icosahedronHeight, icosahedron[2][0], icosahedron[2][1], icosahedronHeight])
     }
   });
 });
 
-function getIcosahedronHeight(icosahedron) {
-  return function callbackFunction() {
-    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], icoHeight, icosahedron[1][0], icosahedron[1][1], icoHeight, icosahedron[2][0], icosahedron[2][1], icoHeight]) };
-  };
-}
-
 setInterval(function(){
-  if (dodeDirection  == "greater" && dodeHeight < maxHeight) {
-    dodeHeight = dodeHeight + 10000
-    icoHeight = icoHeight - 10000
-  } else if (dodeDirection  == "greater" && dodeHeight == maxHeight) {
-    dodeDirection = "smaller"
-    dodeHeight = dodeHeight - 10000
-    icoHeight = icoHeight + 10000
-  } else if (dodeDirection  == "smaller" && dodeHeight > minHeight) {
-    dodeHeight = dodeHeight - 10000
-    icoHeight = icoHeight + 10000
+  if (direction  == "greater" && globeHeight < maxHeight) {
+    globeHeight = globeHeight + 10000
+  } else if (direction  == "greater" && globeHeight == maxHeight) {
+    direction = "smaller"
+    globeHeight = globeHeight - 10000
+  } else if (direction  == "smaller" && globeHeight > minHeight) {
+    globeHeight = globeHeight - 10000
   } else {
-    dodeDirection = "greater"
-    dodeHeight = dodeHeight + 10000
-    icoHeight = icoHeight - 10000
+    direction = "greater"
+    globeHeight = globeHeight + 10000
   }
-}, 10);
+}, 50);
+
+
+const goldEllipsoid = viewSphere.entities.add({
+  name: "Gold Ellipsoid",
+  position: Cesium.Cartesian3.ZERO,
+  ellipsoid: {
+    //radii: new Cesium.Cartesian3(6300000.0, 6300000.0, 6300000.0),
+    radii: new Cesium.CallbackProperty(function(){
+            return new Cesium.Cartesian3(globeHeight, globeHeight, globeHeight);
+        }, false),
+    material: Cesium.Color.GOLD.withAlpha(1.0),
+  },
+});
+
