@@ -2,20 +2,6 @@ import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "../src/css/main.css"
 
-// Your access token can be found at: https://cesium.com/ion/tokens.
-// This is the default access token
-var background_img ="images/blue.jpg";
-var skybox = new Cesium.SkyBox({
-    sources: {
-        positiveX: background_img,
-        negativeX: background_img,
-        positiveY: background_img,
-        negativeY: background_img,
-        positiveZ: background_img,
-        negativeZ: background_img
-    }
-});
-
 var west  = -100000.0;
 var south = -100000.0;
 var east  = 100000.0;
@@ -37,7 +23,6 @@ const optionsSphere = {
     navigationHelpButton: false,
     navigationInstructionsInitiallyVisible: false,
     sceneModePicker: false,
-    skyBox: skybox,
     sceneModePicker: false,
     scene3DOnly: true,
     timeline: false,
@@ -65,6 +50,16 @@ const optionsEarth = {
 
 const viewSphere = new Cesium.Viewer("viewSphere", optionsSphere);
 const viewEarth = new Cesium.Viewer("viewEarth", optionsEarth);
+
+const sceneSphere = viewSphere.scene;
+
+sceneSphere.skyBox.destroy();
+sceneSphere.skyBox = undefined;
+sceneSphere.sun.destroy();
+sceneSphere.sun = undefined;
+sceneSphere.moon.destroy();
+sceneSphere.moon = undefined;
+sceneSphere.backgroundColor = Cesium.Color.DEEPSKYBLUE;
 
 /**
 async function loadWorldTerrain() {
@@ -119,6 +114,7 @@ viewSphere.camera.percentageChanged = 0.01;
 
 // Since the 2D view follows the 3D view, we disable any
 // camera movement on the 2D view
+viewSphere.scene.screenSpaceCameraController.enableTilt = false;
 viewEarth.scene.screenSpaceCameraController.enableRotate = false;
 viewEarth.scene.screenSpaceCameraController.enableTranslate = false;
 viewEarth.scene.screenSpaceCameraController.enableZoom = false;
