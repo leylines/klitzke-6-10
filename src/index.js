@@ -4,7 +4,6 @@ import "../src/css/main.css"
 
 // Your access token can be found at: https://cesium.com/ion/tokens.
 // This is the default access token
-// Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiY2MyZjMxNS01NjI0LTQ3MjMtOTM3MC01NTZiODZkOTdlZjgiLCJpZCI6MTA3LCJpYXQiOjE1MjU0MjA2ODd9.VX2WAx6oqH1yiSxA7heQYax9jhq_p1gBtd1IrRHKzko';
 var background_img ="images/blue.jpg";
 var skybox = new Cesium.SkyBox({
     sources: {
