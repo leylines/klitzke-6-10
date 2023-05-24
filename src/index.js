@@ -26,7 +26,10 @@ const optionsSphere = {
     sceneModePicker: false,
     scene3DOnly: true,
     timeline: false,
+    vrButton: true,
 };
+
+/**
 const optionsEarth = {
     animation: false,
     baseLayerPicker: false,
@@ -47,19 +50,18 @@ const optionsEarth = {
       )
     ),
 };
+**/
 
 const viewSphere = new Cesium.Viewer("viewSphere", optionsSphere);
-const viewEarth = new Cesium.Viewer("viewEarth", optionsEarth);
+//const viewEarth = new Cesium.Viewer("viewEarth", optionsEarth);
 
-const sceneSphere = viewSphere.scene;
-
-sceneSphere.skyBox.destroy();
-sceneSphere.skyBox = undefined;
-sceneSphere.sun.destroy();
-sceneSphere.sun = undefined;
-sceneSphere.moon.destroy();
-sceneSphere.moon = undefined;
-sceneSphere.backgroundColor = Cesium.Color.DEEPSKYBLUE;
+viewSphere.scene.skyBox.destroy();
+viewSphere.scene.skyBox = undefined;
+viewSphere.scene.sun.destroy();
+viewSphere.scene.sun = undefined;
+viewSphere.scene.moon.destroy();
+viewSphere.scene.moon = undefined;
+viewSphere.scene.backgroundColor = Cesium.Color.DEEPSKYBLUE;
 
 /**
 async function loadWorldTerrain() {
@@ -107,19 +109,19 @@ function syncEarthView() {
 }
 
 // Apply our sync function every time the 3D camera view changes
-viewSphere.camera.changed.addEventListener(syncEarthView);
+//viewSphere.camera.changed.addEventListener(syncEarthView);
 // By default, the `camera.changed` event will trigger when the camera has changed by 50%
 // To make it more sensitive, we can bring down this sensitivity
-viewSphere.camera.percentageChanged = 0.01;
+//viewSphere.camera.percentageChanged = 0.01;
 
 // Since the 2D view follows the 3D view, we disable any
 // camera movement on the 2D view
 viewSphere.scene.screenSpaceCameraController.enableTilt = false;
-viewEarth.scene.screenSpaceCameraController.enableRotate = false;
-viewEarth.scene.screenSpaceCameraController.enableTranslate = false;
-viewEarth.scene.screenSpaceCameraController.enableZoom = false;
-viewEarth.scene.screenSpaceCameraController.enableTilt = false;
-viewEarth.scene.screenSpaceCameraController.enableLook = false;
+//viewEarth.scene.screenSpaceCameraController.enableRotate = false;
+//viewEarth.scene.screenSpaceCameraController.enableTranslate = false;
+//viewEarth.scene.screenSpaceCameraController.enableZoom = false;
+//viewEarth.scene.screenSpaceCameraController.enableTilt = false;
+//viewEarth.scene.screenSpaceCameraController.enableLook = false;
 
 /**
 const scene = viewer.scene;
@@ -186,6 +188,7 @@ var minHeight = 5300000;
 var globeHeight = 6300000;
 var direction = "greater";
 
+/**
 dodecahedrons.forEach((dodecahedron, index) => {
   for (let i = 0; i < dodecahedron.length - 1; i++) {
     const corridor = viewEarth.entities.add({
@@ -200,24 +203,26 @@ dodecahedrons.forEach((dodecahedron, index) => {
     });
   };
 });
+**/
 
 dodecahedrons.forEach((dodecahedron, i) => {
   let dodecahedronHeight = 300000;
   const polygon = viewSphere.entities.add({
     name: "Dodecahedron Polygon" + i,
     polygon: {
-      material: Cesium.Color.BLACK.withAlpha(0.1),
+      material: Cesium.Color.BLUE.withAlpha(0.05),
       arcType: 'NONE',
       width: 3,
       outline: true,
       perPositionHeight: true,
-      outlineColor: Cesium.Color.BLACK,
+      outlineColor: Cesium.Color.BLUE,
       outlineWidth: 100,
       hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodecahedronHeight, dodecahedron[1][0], dodecahedron[1][1], dodecahedronHeight, dodecahedron[2][0], dodecahedron[2][1], dodecahedronHeight, dodecahedron[3][0], dodecahedron[3][1], dodecahedronHeight, dodecahedron[4][0], dodecahedron[4][1], dodecahedronHeight])
     }
   });
 });
 
+/**
 icosahedrons.forEach((icosahedron, index) => {
   for (let i = 0; i < icosahedron.length - 1; i++) {
     const corridor = viewEarth.entities.add({
@@ -232,18 +237,19 @@ icosahedrons.forEach((icosahedron, index) => {
     });
   };
 });
+**/
 
 icosahedrons.forEach((icosahedron, i) => {
   let icosahedronHeight = 900000;
   const polygon = viewSphere.entities.add({
     name: "Icosahedron Polygon" + i,
     polygon: {
-      material: Cesium.Color.BLACK.withAlpha(0.1),
+      material: Cesium.Color.RED.withAlpha(0.05),
       arcType: 'NONE',
       width: 3,
       perPositionHeight: true,
       outline: true,
-      outlineColor: Cesium.Color.BLACK,
+      outlineColor: Cesium.Color.RED,
       outlineWidth: 5,
       hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], icosahedronHeight, icosahedron[1][0], icosahedron[1][1], icosahedronHeight, icosahedron[2][0], icosahedron[2][1], icosahedronHeight])
     }
