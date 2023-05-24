@@ -186,7 +186,7 @@ const icosahedrons = [icosahedron1, icosahedron2, icosahedron3, icosahedron4, ic
 var maxHeight = 7300000;
 var minHeight = 5300000;
 var globeHeight = 6300000;
-var direction = "greater";
+var direction = "smaller";
 
 /**
 dodecahedrons.forEach((dodecahedron, index) => {
@@ -220,7 +220,6 @@ dodecahedrons.forEach((dodecahedron, i) => {
       hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodecahedronHeight, dodecahedron[1][0], dodecahedron[1][1], dodecahedronHeight, dodecahedron[2][0], dodecahedron[2][1], dodecahedronHeight, dodecahedron[3][0], dodecahedron[3][1], dodecahedronHeight, dodecahedron[4][0], dodecahedron[4][1], dodecahedronHeight])
     }
   });
-  console.log(polygon);
 });
 
 /**
