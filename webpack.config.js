@@ -4,10 +4,24 @@ const cesiumWorkers = '../Build/Cesium/Workers';
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+const SitemapPlugin = require('sitemap-webpack-plugin').default;
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
+
+const buildDate = new Date().toISOString();
+
+const paths = [
+  {
+    path: '/',
+    lastmod: buildDate
+  }
+];
+
+const pageName = "Leylines - Klitzke 6 - 10";
+const pageDescription = "Leylines - Klitzke 6 - 10";
+const pageURL = "https://klitzke-6-10.leylines.net/";
 
 module.exports = {
     context: __dirname,
@@ -35,11 +49,25 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
+            buildDate: buildDate,
+            pageURL: pageURL,
+            pageName: pageName,
+            pageDescription: pageDescription,
             template: 'src/index.html'
         }),
         new FaviconsWebpackPlugin({
             logo: 'src/leylines-sign.png',
             prefix: 'favicons/',
+        }),
+        new SitemapPlugin({
+            base: pageURL,
+            paths,
+            options: {
+              filename: 'sitemap.xml',
+              lastmod: true,
+              changefreq: 'weekly',
+              priority: 1.0
+            }
         }),
         // Copy Cesium Assets, Widgets, and Workers to a static directory
         new WorkboxPlugin.GenerateSW({
@@ -55,6 +83,8 @@ module.exports = {
                 { from: path.join(cesiumSource, 'Assets'), to: 'Assets' },
                 { from: path.join(cesiumSource, 'Widgets'), to: 'Widgets' },
 		{ from: path.join(cesiumSource, 'ThirdParty'), to: 'ThirdParty' },
+                { from: "src/robots.txt" },
+                { from: "src/CNAME" },
                 //{ from: "src/images", to: "images" }
             ]
         }),

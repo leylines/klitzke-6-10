@@ -17,6 +17,7 @@
     "favicons-webpack-plugin": "^6.0.0",
     "html-webpack-plugin": "^5.5.1",
     "npm-check-updates": "^16.10.12",
+    "sitemap-webpack-plugin": "^1.1.1",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.9",
     "url-loader": "^4.1.1",

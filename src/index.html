@@ -1,11 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="de">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-    <title>Leylines - Klitzke 6 - 10</title>
+
+    <html itemscope itemtype="http://schema.org/Map">
+
+    <!-- Place this data between the <head> tags of your website -->
+    <meta name="description" content="<%= htmlWebpackPlugin.options.pageDescription %>" />
+    <title><%= htmlWebpackPlugin.options.pageName %></title>
+
+    <!-- Schema.org markup for Google+ and also default schema for other search engines -->
+    <meta itemprop="name" content="<%= htmlWebpackPlugin.options.pageName %>">
+    <meta itemprop="description" content="<%= htmlWebpackPlugin.options.pageDescription %>">
+    <meta itemprop="image" content="<%= htmlWebpackPlugin.options.pageURL %>/favicons/apple-touch-startup-image-1334x750.png">
+
+    <!-- Twitter Card data -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@EarthAndData">
+    <meta name="twitter:title" content="<%= htmlWebpackPlugin.options.pageName %>">
+    <meta name="twitter:description" content="<%= htmlWebpackPlugin.options.pageDescription %>">
+    <meta name="twitter:creator" content="@EarthAndData">
+    <!-- Twitter summary card with large image must be at least 280x150px -->
+    <meta name="twitter:image:src" content="<%= htmlWebpackPlugin.options.pageURL %>/favicons/apple-touch-startup-image-1334x750.png">
+
+    <!-- Open Graph data -->
+    <meta property="og:title" content="<%= htmlWebpackPlugin.options.pageName %>" />
+    <meta property="og:type" content="map" />
+    <meta property="og:url" content="<%= htmlWebpackPlugin.options.pageURL %>" />
+    <meta property="og:image" content="<%= htmlWebpackPlugin.options.pageURL %>/favicons/apple-touch-startup-image-1334x750.png" />
+    <meta property="og:description" content="<%= htmlWebpackPlugin.options.pageDescription %>" />
+    <meta property="og:site_name" content="<%= htmlWebpackPlugin.options.pageName %>" />
+    <meta property="article:published_time" content="2023-05-25T21:30:00Z" />
+    <meta property="article:modified_time" content="<%= htmlWebpackPlugin.options.buildDate %>" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Map",
+      "mainEntityOfPage": {
+        "@type": "WebPage"
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "<%= htmlWebpackPlugin.options.pageURL %>/favicons/apple-touch-startup-image-1334x750.png",
+        "height": 750,
+        "width": 1334
+      },
+      "datePublished": "2023-05-25T21:30:00Z",
+      "dateModified": "<%= htmlWebpackPlugin.options.buildDate %>",
+      "author": {
+        "@type": "Author",
+        "name": "Joerg Roth"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Leylines",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "<%= htmlWebpackPlugin.options.pageURL %>/favicons/apple-touch-startup-image-1334x750.png",
+          "width": 1334,
+          "height": 750
+        }
+      },
+      "description": "<%= htmlWebpackPlugin.options.pageDescription %>"
+    }
+    </script>
+
+
   </head>
   <body>
     <div id="cesiumContainer" class="fullSize">
