@@ -2,6 +2,16 @@ import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "../src/css/main.css"
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log('SW registered: ', registration);
+    }).catch(registrationError => {
+      console.log('SW registration failed: ', registrationError);
+    });
+  });
+}
+
 var west  = -100000.0;
 var south = -100000.0;
 var east  = 100000.0;
@@ -11,11 +21,9 @@ var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 1;
 Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
-const clockViewModel = new Cesium.ClockViewModel();
 const optionsSphere = {
     animation: false,
     baseLayerPicker: true,
-    clockViewModel: clockViewModel,
     fullscreenButton: false,
     geocoder: false,
     globe: false,
@@ -29,31 +37,7 @@ const optionsSphere = {
     vrButton: true,
 };
 
-/**
-const optionsEarth = {
-    animation: false,
-    baseLayerPicker: false,
-    clockViewModel: clockViewModel,
-    fullscreenButton: false,
-    geocoder: false,
-    hdr: true,
-    homeButton: false,
-    infoBox: false,
-    navigationHelpButton: false,
-    navigationInstructionsInitiallyVisible: false,
-    sceneModePicker: false,
-    scene3DOnly: true,
-    timeline: false,
-    baseLayer: Cesium.ImageryLayer.fromProviderAsync(
-      Cesium.ArcGisMapServerImageryProvider.fromUrl(
-        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-      )
-    ),
-};
-**/
-
-const viewSphere = new Cesium.Viewer("viewSphere", optionsSphere);
-//const viewEarth = new Cesium.Viewer("viewEarth", optionsEarth);
+const viewSphere = new Cesium.Viewer("cesiumContainer", optionsSphere);
 
 viewSphere.scene.skyBox.destroy();
 viewSphere.scene.skyBox = undefined;
@@ -63,87 +47,7 @@ viewSphere.scene.moon.destroy();
 viewSphere.scene.moon = undefined;
 viewSphere.scene.backgroundColor = Cesium.Color.DEEPSKYBLUE;
 
-/**
-async function loadWorldTerrain() {
-  let worldTerrain;
-  try {
-    worldTerrain = await Cesium.createWorldTerrainAsync();
-    viewEarth.scene.terrainProvider = worldTerrain;
-  } catch (error) {
-    window.alert(`There was an error creating world terrain. ${error}`);
-  }
-};
-
-loadWorldTerrain();
-**/
-
-let sphereWorldPosition;
-let sphereDistance;
-
-function syncEarthView() {
-  // The center of the view is the point that the 3D camera is focusing on
-  const viewCenter = new Cesium.Cartesian2(
-    Math.floor(viewSphere.canvas.clientWidth / 2),
-    Math.floor(viewSphere.canvas.clientHeight / 2)
-  );
-  // Given the pixel in the center, get the world position
-  const newSphereWorldPosition = viewSphere.scene.camera.pickEllipsoid(
-    viewCenter
-  );
-  if (Cesium.defined(newSphereWorldPosition)) {
-    // Guard against the case where the center of the screen
-    // does not fall on a position on the globe
-    sphereWorldPosition = newSphereWorldPosition;
-  }
-  // Get the distance between the world position of the point the camera is focusing on, and the camera's world position
-  sphereDistance = Cesium.Cartesian3.distance(
-    sphereWorldPosition,
-    viewSphere.scene.camera.positionWC
-  );
-  // Tell the 2D camera to look at the point of focus. The distance controls how zoomed in the 2D view is
-  // (try replacing `distance` in the line below with `1e7`. The view will still sync, but will have a constant zoom)
-  viewEarth.scene.camera.lookAt(
-    sphereWorldPosition,
-    new Cesium.Cartesian3(0.0, 0.0, sphereDistance)
-  );
-}
-
-// Apply our sync function every time the 3D camera view changes
-//viewSphere.camera.changed.addEventListener(syncEarthView);
-// By default, the `camera.changed` event will trigger when the camera has changed by 50%
-// To make it more sensitive, we can bring down this sensitivity
-//viewSphere.camera.percentageChanged = 0.01;
-
-// Since the 2D view follows the 3D view, we disable any
-// camera movement on the 2D view
 viewSphere.scene.screenSpaceCameraController.enableTilt = false;
-//viewEarth.scene.screenSpaceCameraController.enableRotate = false;
-//viewEarth.scene.screenSpaceCameraController.enableTranslate = false;
-//viewEarth.scene.screenSpaceCameraController.enableZoom = false;
-//viewEarth.scene.screenSpaceCameraController.enableTilt = false;
-//viewEarth.scene.screenSpaceCameraController.enableLook = false;
-
-/**
-const scene = viewer.scene;
-const globe = scene.globe;
-const baseLayer = viewer.scene.imageryLayers.get(0);
-
-//globe.showGroundAtmosphere = false;
-//globe.baseColor = Cesium.Color.TRANSPARENT;
-//globe.translucency.enabled = true;
-//globe.undergroundColor = undefined;
-
-// Set oceans on base layer to transparent
-//baseLayer.colorToAlpha = new Cesium.Color(0.0, 0.0, 0.0);
-//baseLayer.colorToAlphaThreshold = 0.2;
-
-globe.showGroundAtmosphere = false;
-globe.translucency.enabled = true;
-globe.undergroundColor = undefined;
-globe.translucency.frontFaceAlpha = 0.20;
-globe.translucency.backFaceAlpha = 0.00;
-
-**/
 
 const dodecahedron1 = [[-40.79776321801472,10.808510583843841],[-4.80138334081505,-10.822281509027434],[31.2,10.800000000010684],[31.200000000000003,52.61031489578929],[-40.78466772957245,52.618824140935395],[-40.79776321801472,10.808510583843841]];
 const dodecahedron2 = [[31.200000000000003,52.61031489578929],[31.2,10.800000000010684],[67.20138334081507,-10.822281509027448],[103.19776321801469,10.808510583843827],[103.1846677295724,52.618824140935374],[31.200000000000003,52.61031489578929]];
@@ -188,23 +92,6 @@ var minHeight = 5300000;
 var globeHeight = 6300000;
 var direction = "smaller";
 
-/**
-dodecahedrons.forEach((dodecahedron, index) => {
-  for (let i = 0; i < dodecahedron.length - 1; i++) {
-    const corridor = viewEarth.entities.add({
-      name: "Dodecahedron Corridor " + i,
-      corridor: {
-        width: 120000,
-        height: 0,
-        material: Cesium.Color.GREY.withAlpha(0.4),
-        outline: false,
-        positions: Cesium.Cartesian3.fromDegreesArray([dodecahedron[i][0], dodecahedron[i][1], dodecahedron[i+1][0], dodecahedron[i+1][1]]),
-      }
-    });
-  };
-});
-**/
-
 dodecahedrons.forEach((dodecahedron, i) => {
   let dodecahedronHeight = 300000;
   const polygon = viewSphere.entities.add({
@@ -221,23 +108,6 @@ dodecahedrons.forEach((dodecahedron, i) => {
     }
   });
 });
-
-/**
-icosahedrons.forEach((icosahedron, index) => {
-  for (let i = 0; i < icosahedron.length - 1; i++) {
-    const corridor = viewEarth.entities.add({
-      name: "corridor " + i,
-      corridor: {
-        width: 120000,
-        height: 0,
-        material: Cesium.Color.GREY.withAlpha(0.4),
-        outline: false,
-        positions: Cesium.Cartesian3.fromDegreesArray([icosahedron[i][0], icosahedron[i][1], icosahedron[i+1][0], icosahedron[i+1][1]]),
-      }
-    });
-  };
-});
-**/
 
 icosahedrons.forEach((icosahedron, i) => {
   let icosahedronHeight = 900000;

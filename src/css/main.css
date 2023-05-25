@@ -1,23 +1,10 @@
 html, body, #cesiumContainer {
-  display: flex;
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
-
-#viewSphere {
-  display: inline-block;
-  width: 100%;
-}
-
-/**
-#viewEarth {
-  display: inline-block;
-  width: 100%;
-}
-**/
 
 .logo {
   position: absolute;

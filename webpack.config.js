@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
@@ -36,13 +37,20 @@ module.exports = {
             template: 'src/index.html'
         }),
         // Copy Cesium Assets, Widgets, and Workers to a static directory
+        new WorkboxPlugin.GenerateSW({
+            // these options encourage the ServiceWorkers to get in there fast
+            // and not allow any straggling "old" SWs to hang around
+            maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
+            clientsClaim: true,
+            skipWaiting: true,
+        }),
         new CopyWebpackPlugin({
             patterns: [
                 { from: path.join(cesiumSource, cesiumWorkers), to: 'Workers' },
                 { from: path.join(cesiumSource, 'Assets'), to: 'Assets' },
                 { from: path.join(cesiumSource, 'Widgets'), to: 'Widgets' },
 		{ from: path.join(cesiumSource, 'ThirdParty'), to: 'ThirdParty' },
-                { from: "src/images", to: "images" }
+                //{ from: "src/images", to: "images" }
             ]
         }),
         new webpack.DefinePlugin({
