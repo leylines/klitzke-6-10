@@ -3,6 +3,7 @@ const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
@@ -35,6 +36,10 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: 'src/index.html'
+        }),
+        new FaviconsWebpackPlugin({
+            logo: 'src/leylines-sign.png',
+            prefix: 'favicons/',
         }),
         // Copy Cesium Assets, Widgets, and Workers to a static directory
         new WorkboxPlugin.GenerateSW({
