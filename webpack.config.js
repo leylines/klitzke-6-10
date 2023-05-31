@@ -74,6 +74,7 @@ module.exports = {
             // these options encourage the ServiceWorkers to get in there fast
             // and not allow any straggling "old" SWs to hang around
             maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
+            exclude: ['CNAME'],
             clientsClaim: true,
             skipWaiting: true,
         }),
