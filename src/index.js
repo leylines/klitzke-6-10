@@ -153,8 +153,8 @@ const goldEllipsoid = viewSphere.entities.add({
     radii: new Cesium.CallbackProperty(function(){
             return new Cesium.Cartesian3(globeHeight, globeHeight, globeHeight);
         }, false),
-    material: Cesium.Color.GOLD.withAlpha(1.0),
-    //material: new Cesium.ColorMaterialProperty(fadeAlpha),
+    //material: Cesium.Color.GOLD.withAlpha(1.0),
+    material: new Cesium.ColorMaterialProperty(fadeAlpha),
   },
 });
 
