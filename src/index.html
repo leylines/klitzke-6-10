@@ -76,5 +76,88 @@
     <div id="cesiumContainer" class="fullSize">
       <a href="https://maps.leylines.net"><img src="https://maps.leylines.net/images/leylines-logo.svg" alt="Leylines Logo" class="logo"></a>
     </div>
+    <div id="switcher">
+      <button type="button" id="switchit" class="cesium-button">Show toolbar</button> 
+    </div>
+    <div id="toolbar">
+      <table>
+        <tbody>
+          <tr>
+            <td id="title" colspan="3">Earth</td>
+          </tr>
+          <tr>
+            <td>Visible</td>
+            <td>
+              <input type="checkbox" data-bind="checked: showGlobe">
+            </td>
+          </tr>
+          <tr>
+            <td>Transparency</td>
+            <td>
+              <input type="range" min="0.0" max="1.0" step="0.01" data-bind="value: globeTransparency, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: globeTransparency">
+            </td>
+          </tr>
+          <tr>
+            <td id="title" colspan="3">Golden Sphere</td>
+          </tr>
+          <tr>
+            <td>Transparency</td>
+            <td>
+              <input type="range" min="0.0" max="1.0" step="0.01" data-bind="value: sphereTransparency, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: sphereTransparency">
+            </td>
+          </tr>
+          <tr>
+            <td>Max. Radius</td>
+            <td>
+              <input type="range" min="6310000" max="9300000" step="10000" data-bind="value: maxHeight, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: maxHeight">
+            </td>
+          </tr>
+          <tr>
+            <td>Min. Radius</td>
+            <td>
+              <input type="range" min="2300000" max="6290000" step="10000" data-bind="value: minHeight, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: minHeight">
+            </td>
+          </tr>
+          <tr>
+            <td id="title" colspan="3">Dodecahedron</td>
+          </tr>
+          <tr>
+            <td>Transparency</td>
+            <td>
+              <input type="range" min="0.0" max="1.0" step="0.01" data-bind="value: dodeTransparency, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: dodeTransparency">
+            </td>
+          </tr>
+          <tr>
+            <td>Height</td>
+            <td>
+              <input type="range" min="10000" max="2000000" step="1000" data-bind="value: dodeHeight, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: dodeHeight">
+            </td>
+          </tr>
+          <tr>
+            <td id="title" colspan="3">Icosahedron</td>
+          </tr>
+          <tr>
+            <td>Transparency</td>
+            <td>
+              <input type="range" min="0.0" max="1.0" step="0.01" data-bind="value: icoTransparency, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: icoTransparency">
+            </td>
+          </tr>
+          <tr>
+            <td>Height</td>
+            <td>
+              <input type="range" min="10000" max="2000000" step="1000" data-bind="value: icoHeight, valueUpdate: 'input'">
+              <input type="text" size="4" data-bind="value: icoHeight">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </body>
 </html>

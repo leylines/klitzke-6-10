@@ -1,9 +1,44 @@
 html, body, #cesiumContainer {
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
   width: 100%;
   height: 100%;
+  border:none;
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+#switcher {
+  position:absolute;
+  top:5px;
+  left:5px;
+  z-index: 1;
+}
+
+#toolbar {
+  top:15px;
+  left:0px;
+  font-family: sans-serif;
+  font-size: 9pt;
+  padding: 2px 8px;
+  position: absolute;
+  display: none;
+}
+
+#toolbar input {
+  vertical-align: middle;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+#title {
+  padding: 8px;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 12pt;
 }
 
 .logo {

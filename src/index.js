@@ -12,6 +12,19 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+var switcher = false
+document.getElementById("switchit").onclick = function() {
+  if (!switcher) {
+    document.getElementById("toolbar").style.display = "inline";
+    document.getElementById("switchit").textContent = "Hide toolbar";
+    switcher = true;
+  } else {
+    document.getElementById("toolbar").style.display = "none";
+    document.getElementById("switchit").textContent = "Show toolbar";
+    switcher = false;
+  }
+}
+
 var west  = -100000.0;
 var south = -100000.0;
 var east  = 100000.0;
@@ -26,7 +39,6 @@ const optionsSphere = {
     baseLayerPicker: false,
     fullscreenButton: false,
     geocoder: false,
-    globe: false,
     infoBox: false,
     navigationHelpButton: false,
     navigationInstructionsInitiallyVisible: false,
@@ -34,7 +46,12 @@ const optionsSphere = {
     sceneModePicker: false,
     scene3DOnly: true,
     timeline: false,
-    vrButton: true,
+    vrButton: false,
+    baseLayer: Cesium.ImageryLayer.fromProviderAsync(
+      Cesium.ArcGisMapServerImageryProvider.fromUrl(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
+      )
+    ),
 };
 
 const viewSphere = new Cesium.Viewer("cesiumContainer", optionsSphere);
@@ -46,6 +63,12 @@ viewSphere.scene.sun = undefined;
 viewSphere.scene.moon.destroy();
 viewSphere.scene.moon = undefined;
 viewSphere.scene.backgroundColor = Cesium.Color.DEEPSKYBLUE;
+
+viewSphere.scene.globe.show = false;
+viewSphere.scene.globe.translucency.enabled = true;
+viewSphere.scene.globe.translucency.frontFaceAlpha = 0.8;
+viewSphere.scene.globe.translucency.backFaceAlpha = 0.0;
+viewSphere.scene.skyAtmosphere.show = false;
 
 viewSphere.scene.screenSpaceCameraController.enableTilt = false;
 
@@ -87,15 +110,98 @@ const icosahedron20 = [[-40.80585764782063, -26.56885672935232], [31.19999999999
 
 const icosahedrons = [icosahedron1, icosahedron2, icosahedron3, icosahedron4, icosahedron5, icosahedron6, icosahedron7, icosahedron8, icosahedron9, icosahedron10, icosahedron11, icosahedron12, icosahedron13, icosahedron14, icosahedron15, icosahedron16, icosahedron17, icosahedron18, icosahedron19, icosahedron20]
 
-var maxHeight = 7300000;
-var minHeight = 5300000;
+const toolbarParameters = {
+  maxHeight: 7300000,
+  minHeight: 5300000,
+  icoHeight: 920000,
+  dodeHeight: 300000,
+  showGlobe: false,
+  globeTransparency: 0.8,
+  sphereTransparency: 1.0,
+  dodeTransparency: 0.1,
+  icoTransparency: 0.1,
+};
+
+Cesium.knockout.track(toolbarParameters);
+const toolbar = document.getElementById("toolbar");
+Cesium.knockout.applyBindings(toolbarParameters, toolbar);
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "maxHeight")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    toolbarParameters.maxHeight = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "minHeight")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    toolbarParameters.minHeight = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "dodeHeight")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    toolbarParameters.dodeHeight = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "icoHeight")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    toolbarParameters.icoHeight = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "showGlobe")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    viewSphere.scene.globe.show = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "globeTransparency")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    viewSphere.scene.globe.translucency.frontFaceAlpha = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "sphereTransparency")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    toolbarParameters.sphereTransparency = value;
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "dodeTransparency")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    for (var i = 0; i < dodecahedrons.length; ++i) {
+       var entity = viewSphere.entities.getById('dode' + i);
+       entity.polygon.material = Cesium.Color.BLUE.withAlpha(value);
+    }
+  });
+
+Cesium.knockout
+  .getObservable(toolbarParameters, "icoTransparency")
+  .subscribe(function (newValue) {
+    const value = Number(newValue);
+    for (var i = 0; i < icosahedrons.length; ++i) {
+       var entity = viewSphere.entities.getById('ico' + i);
+       entity.polygon.material = Cesium.Color.RED.withAlpha(value);
+    }
+  });
+
 var globeHeight = 6300000;
 var direction = "smaller";
 
 dodecahedrons.forEach((dodecahedron, i) => {
-  let dodecahedronHeight = 300000;
   const polygon = viewSphere.entities.add({
     name: "Dodecahedron Polygon" + i,
+    id: 'dode' + i,
     polygon: {
       material: Cesium.Color.BLUE.withAlpha(0.1),
       arcType: 'NONE',
@@ -104,15 +210,26 @@ dodecahedrons.forEach((dodecahedron, i) => {
       perPositionHeight: true,
       outlineColor: Cesium.Color.BLUE,
       outlineWidth: 5,
-      hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], dodecahedronHeight, dodecahedron[1][0], dodecahedron[1][1], dodecahedronHeight, dodecahedron[2][0], dodecahedron[2][1], dodecahedronHeight, dodecahedron[3][0], dodecahedron[3][1], dodecahedronHeight, dodecahedron[4][0], dodecahedron[4][1], dodecahedronHeight])
+      hierarchy: new Cesium.CallbackProperty(getDodecahedronHeight(dodecahedron), false),
     }
   });
 });
 
+function getDodecahedronHeight(dodecahedron) {
+  return function callbackFunction() {
+    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([dodecahedron[0][0], dodecahedron[0][1], toolbarParameters.dodeHeight, dodecahedron[1][0], dodecahedron[1][1], toolbarParameters.dodeHeight, dodecahedron[2][0], dodecahedron[2][1], toolbarParameters.dodeHeight, dodecahedron[3][0], dodecahedron[3][1], toolbarParameters.dodeHeight, dodecahedron[4][0], dodecahedron[4][1], toolbarParameters.dodeHeight]) };
+  };
+}
+
+var position = Cesium.Cartesian3.fromDegrees(icosahedrons[0][0][0], icosahedrons[0][0][1], toolbarParameters.icoHeight);
+console.log(toolbarParameters.icoHeight);
+console.log(position);
+console.log(Math.sqrt(Math.pow(position['x'],2) +  Math.pow(position['y'],2) + Math.pow(position['z'],2)))
+
 icosahedrons.forEach((icosahedron, i) => {
-  let icosahedronHeight = 920000;
   const polygon = viewSphere.entities.add({
-    name: "Icosahedron Polygon" + i,
+    name: "Icosahedron Polygon " + i,
+    id: 'ico' + i,
     polygon: {
       material: Cesium.Color.RED.withAlpha(0.1),
       arcType: 'NONE',
@@ -121,18 +238,24 @@ icosahedrons.forEach((icosahedron, i) => {
       outline: true,
       outlineColor: Cesium.Color.RED,
       outlineWidth: 5,
-      hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], icosahedronHeight, icosahedron[1][0], icosahedron[1][1], icosahedronHeight, icosahedron[2][0], icosahedron[2][1], icosahedronHeight])
+      hierarchy: new Cesium.CallbackProperty(getIcosahedronHeight(icosahedron), false)
     }
   });
 });
 
+function getIcosahedronHeight(icosahedron) {
+  return function callbackFunction() {
+    return { positions: Cesium.Cartesian3.fromDegreesArrayHeights([icosahedron[0][0], icosahedron[0][1], toolbarParameters.icoHeight, icosahedron[1][0], icosahedron[1][1], toolbarParameters.icoHeight, icosahedron[2][0], icosahedron[2][1], toolbarParameters.icoHeight]) };
+  };
+}
+
 setInterval(function(){
-  if (direction  == "greater" && globeHeight < maxHeight) {
+  if (direction  == "greater" && globeHeight < toolbarParameters.maxHeight) {
     globeHeight = globeHeight + 10000
-  } else if (direction  == "greater" && globeHeight == maxHeight) {
+  } else if (direction  == "greater" && globeHeight >= toolbarParameters.maxHeight) {
     direction = "smaller"
     globeHeight = globeHeight - 10000
-  } else if (direction  == "smaller" && globeHeight > minHeight) {
+  } else if (direction  == "smaller" && globeHeight > toolbarParameters.minHeight) {
     globeHeight = globeHeight - 10000
   } else {
     direction = "greater"
@@ -140,21 +263,19 @@ setInterval(function(){
   }
 }, 50);
 
-var fadeAlpha = new Cesium.CallbackProperty(function(time, result){
-    let alpha = (( globeHeight - minHeight ) / (maxHeight - minHeight)) * (254 - 194) + 0;
-    return Cesium.Color.fromBytes(255, 221, 0, 254 - alpha, result);
+var fadeSphere = new Cesium.CallbackProperty(function(time, result){
+    return Cesium.Color.GOLD.withAlpha(toolbarParameters.sphereTransparency);
 }, false);
 
 const goldEllipsoid = viewSphere.entities.add({
   name: "Gold Ellipsoid",
   position: Cesium.Cartesian3.ZERO,
   ellipsoid: {
-    //radii: new Cesium.Cartesian3(6300000.0, 6300000.0, 6300000.0),
     radii: new Cesium.CallbackProperty(function(){
             return new Cesium.Cartesian3(globeHeight, globeHeight, globeHeight);
         }, false),
-    material: Cesium.Color.GOLD.withAlpha(1.0),
-    //material: new Cesium.ColorMaterialProperty(fadeAlpha),
+    //material: Cesium.Color.GOLD.withAlpha(1.0),
+    material: new Cesium.ColorMaterialProperty(fadeSphere),
   },
 });
 
