@@ -165,6 +165,7 @@ Cesium.knockout
   .getObservable(toolbarParameters, "globeTransparency")
   .subscribe(function (newValue) {
     const value = Number(newValue);
+    toolbarParameters.globeTransparency = value;
     viewSphere.scene.globe.translucency.frontFaceAlpha = value;
   });
 
@@ -179,6 +180,7 @@ Cesium.knockout
   .getObservable(toolbarParameters, "dodeTransparency")
   .subscribe(function (newValue) {
     const value = Number(newValue);
+    toolbarParameters.dodeTransparency = value;
     for (var i = 0; i < dodecahedrons.length; ++i) {
        var entity = viewSphere.entities.getById('dode' + i);
        entity.polygon.material = Cesium.Color.BLUE.withAlpha(value);
@@ -189,6 +191,7 @@ Cesium.knockout
   .getObservable(toolbarParameters, "icoTransparency")
   .subscribe(function (newValue) {
     const value = Number(newValue);
+    toolbarParameters.icoTransparency = value;
     for (var i = 0; i < icosahedrons.length; ++i) {
        var entity = viewSphere.entities.getById('ico' + i);
        entity.polygon.material = Cesium.Color.RED.withAlpha(value);
@@ -221,10 +224,12 @@ function getDodecahedronHeight(dodecahedron) {
   };
 }
 
+/*
 var position = Cesium.Cartesian3.fromDegrees(icosahedrons[0][0][0], icosahedrons[0][0][1], toolbarParameters.icoHeight);
 console.log(toolbarParameters.icoHeight);
 console.log(position);
 console.log(Math.sqrt(Math.pow(position['x'],2) +  Math.pow(position['y'],2) + Math.pow(position['z'],2)))
+*/
 
 icosahedrons.forEach((icosahedron, i) => {
   const polygon = viewSphere.entities.add({
